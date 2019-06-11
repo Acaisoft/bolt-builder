@@ -1,0 +1,10 @@
+gcp:
+  kms:
+    key: main
+    keyring: devops
+    location: global
+  project_name: acai-bolt
+seals:
+  secrets: []
+secrets:
+- creds.json

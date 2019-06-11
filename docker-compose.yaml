@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  builder:
+    image: eu.gcr.io/acai-bolt/argo-builder
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=./creds.json
+      - REPOSITORY_URL=git@bitbucket.org:acaisoft/bolt-sample-load.git
+      - TENANT_ID=1
+      - PROJECT_ID=43c1e03c-49b1-4058-94b9-590525b3fa10
+      - CLOUDSDK_CORE_PROJECT=acai-bolt
+    volumes:
+      - ~/.ssh:/root/.ssh:ro
+      - ./creds.json:/builder/creds.json

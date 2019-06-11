@@ -9,6 +9,11 @@ services:
       - TENANT_ID=1
       - PROJECT_ID=43c1e03c-49b1-4058-94b9-590525b3fa10
       - CLOUDSDK_CORE_PROJECT=acai-bolt
+      - REDIS_URL=redis://redis:6379/0
+      - NO_CACHE=0
     volumes:
       - ~/.ssh:/root/.ssh:ro
       - ./creds.json:/builder/creds.json
+
+  redis:
+    image: redis:alpine

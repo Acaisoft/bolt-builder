@@ -42,7 +42,7 @@ repo = git.Repo.clone_from(repo_url, repo_path, depth=1)
 logger.info(f'Repository cloned to {repo_path}')
 head_sha = repo.head.object.hexsha
 
-if not int(os.environ.get('NO_CACHE')):
+if not int(os.environ.get('NO_CACHE', '1')):
     docker_image = cache.get_docker_image_by_sha(tenant_id, project_id, head_sha)
     if docker_image:
         logger.info(f'Found image in cache: {docker_image}')

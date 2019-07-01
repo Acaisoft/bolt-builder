@@ -38,21 +38,20 @@ repo_path = tempfile.mkdtemp()
 tenant_id = os.environ.get('TENANT_ID')
 project_id = os.environ.get('PROJECT_ID')
 
-send_stage_log('Starting preparation')
+send_stage_log('PENDING', stage='downloading_source')
 logger.info(f'Cloning repository {repo_url}...')
-send_stage_log('Cloning repository...')
 repo = git.Repo.clone_from(repo_url, repo_path, depth=1)
+send_stage_log('SUCCEEDED', 'downloading_source')
 logger.info(f'Repository cloned to {repo_path}')
-send_stage_log('Repository cloned')
 head_sha = repo.head.object.hexsha
 
+send_stage_log('PENDING', 'image_preparation')
 if not int(os.environ.get('NO_CACHE')):
     docker_image = cache.get_docker_image_by_sha(tenant_id, project_id, head_sha)
     if docker_image:
         logger.info(f'Found image in cache: {docker_image}')
-        send_stage_log('Got image from cache')
         write_output(docker_image)
-        send_stage_log('Preparation finished')
+        send_stage_log('SUCCEEDED', 'image_preparation')
         exit(0)
 
 logger.info('Wrapping repository')
@@ -62,14 +61,12 @@ logger.info('Repository wrapped')
 
 destination = get_docker_image_destination(tenant_id, project_id)
 logger.info(f'Starting to build image {destination}')
-send_stage_log('Building new image...')
 google_cloud_build = GoogleCloudBuild()
 google_cloud_build.build(repo_path, destination)
 logger.info('Image built')
-send_stage_log('Image built')
 
 cache.set_docker_image_by_sha(tenant_id, project_id, head_sha, destination)
 logger.info(f'Written image to cache: {destination}')
 
 write_output(destination)
-send_stage_log('Preparation finished')
+send_stage_log('SUCCEEDED', 'image_preparation')

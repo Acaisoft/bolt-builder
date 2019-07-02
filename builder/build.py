@@ -33,6 +33,8 @@ def write_output(docker_image):
         file.write(docker_image)
 
 
+send_stage_log('SUCCEEDED', 'start')
+
 repo_url = os.environ.get('REPOSITORY_URL')
 repo_path = tempfile.mkdtemp()
 tenant_id = os.environ.get('TENANT_ID')

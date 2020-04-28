@@ -1,3 +1,4 @@
+gevent==1.4.0
 gitpython==2.1.11
 redis==3.2.1
 requests==2.22.0

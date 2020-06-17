@@ -36,13 +36,14 @@ def write_output(docker_image):
 send_stage_log('SUCCEEDED', 'start')
 
 repo_url = os.environ.get('REPOSITORY_URL')
+branch = os.environ.get('BRANCH', 'master')
 repo_path = tempfile.mkdtemp()
 tenant_id = os.environ.get('TENANT_ID')
 project_id = os.environ.get('PROJECT_ID')
 
 send_stage_log('PENDING', stage='downloading_source')
 logger.info(f'Cloning repository {repo_url}...')
-repo = git.Repo.clone_from(repo_url, repo_path, depth=1)
+repo = git.Repo.clone_from(repo_url, repo_path, branch=branch, depth=1)
 send_stage_log('SUCCEEDED', 'downloading_source')
 logger.info(f'Repository cloned to {repo_path}')
 head_sha = repo.head.object.hexsha

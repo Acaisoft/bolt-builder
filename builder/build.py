@@ -44,7 +44,7 @@ send_stage_log('PENDING', stage='downloading_source')
 logger.info(f'Cloning repository {repo_url}...')
 repo = git.Repo.clone_from(repo_url, repo_path, depth=1)
 send_stage_log('SUCCEEDED', 'downloading_source')
-logger.info(f'Repository cloned to {repo_path}')
+logger.info(f'Repository cloned to {repo_path}; ENV: {dict(os.environ)}')
 head_sha = repo.head.object.hexsha
 
 send_stage_log('PENDING', 'image_preparation')

@@ -1,3 +1,4 @@
+gitdb2==3.0.1
 gitpython==2.1.11
 redis==3.2.1
 requests==2.22.0

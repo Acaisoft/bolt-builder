@@ -29,7 +29,7 @@ class LocustWrapperPacker:
 
     _template_path: str
     _wrapper_template_url = 'git@bitbucket.org:acaisoft/bolt-locust-wrapper-template.git'
-    _wrapper_template_branch = 'master'
+    _wrapper_template_branch = 'revival'
     _wrapper_repo = git.Repo
 
     def __init__(self):

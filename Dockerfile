@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.6
 
 RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-237.0.0-linux-x86_64.tar.gz > /tmp/google-cloud-sdk.tar.gz \
   && mkdir -p /usr/local/gcloud \
@@ -7,13 +7,14 @@ RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
 
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 
-RUN pip install -U pip
+RUN pip install --upgrade pip==20.1.1
 
 WORKDIR /builder
 
 COPY builder/ .
 COPY requirements.txt .
+COPY requirements.lock .
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.lock
 
 CMD python build.py

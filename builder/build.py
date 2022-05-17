@@ -1,30 +1,34 @@
-import tempfile
-import uuid
-import os
 import logging
+import os
 import sys
+import tempfile
+
 import git
 
-from cache import Cache
-
+from execution_stage_log import send_stage_log
 from google_cloud_build import GoogleCloudBuild
 from locust_wrapper_packer import LocustWrapperPacker
-from execution_stage_log import send_stage_log
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-cache = Cache()
+IMAGE_REGISTRY_ADDRESS = 'eu.gcr.io/acai-bolt/bolt-deployer-builds-local'
 
 
-def get_docker_image_destination(tenant_id: str, project_id: str):
-    name = str(uuid.uuid4())
-    return '{base_registry}:tenants-{tenant}-projects-{project}-{name}'.format(
-        base_registry='eu.gcr.io/acai-bolt/bolt-deployer-builds-local'.rstrip('/'),
+def get_image_tag(tenant_id: str, project_id: str, repo_url: str, commit_hash: str):
+    return 'tenants-{tenant}-projects-{project}-repo-{url}-{commit_hash}'.format(
         tenant=tenant_id,
         project=project_id,
-        name=name,
+        url=repo_url,
+        commit_hash=commit_hash,
+    )
+
+
+def get_docker_image_destination(image_tag: str):
+    return '{base_registry}:{image_tag}'.format(
+        base_registry=IMAGE_REGISTRY_ADDRESS,
+        image_tag=image_tag,
     )
 
 
@@ -49,11 +53,16 @@ logger.info(f'Repository cloned to {repo_path}')
 head_sha = repo.head.object.hexsha
 
 send_stage_log('PENDING', 'image_preparation')
+google_cloud_build = GoogleCloudBuild()
+google_cloud_build.activate_service_account()
+image_tag = get_image_tag(tenant_id, project_id, repo_url, head_sha)
+image_address = get_docker_image_destination(image_tag)
+
 if not int(os.environ.get('NO_CACHE')):
-    docker_image = cache.get_docker_image_by_sha(tenant_id, project_id, head_sha)
-    if docker_image:
-        logger.info(f'Found image in cache: {docker_image}')
-        write_output(docker_image)
+    is_image_exists = google_cloud_build.check_if_image_exist(IMAGE_REGISTRY_ADDRESS, image_tag)
+    if is_image_exists:
+        logger.info(f'Found image the registry: {image_address}')
+        write_output(image_address)
         send_stage_log('SUCCEEDED', 'image_preparation')
         exit(0)
 
@@ -62,14 +71,10 @@ wrapper = LocustWrapperPacker()
 wrapper.wrap(repo_path)
 logger.info('Repository wrapped')
 
-destination = get_docker_image_destination(tenant_id, project_id)
-logger.info(f'Starting to build image {destination}')
-google_cloud_build = GoogleCloudBuild()
-google_cloud_build.build(repo_path, destination)
+logger.info(f'Starting to build image {image_address}')
+
+google_cloud_build.build(repo_path, image_address)
 logger.info('Image built')
 
-cache.set_docker_image_by_sha(tenant_id, project_id, head_sha, destination)
-logger.info(f'Written image to cache: {destination}')
-
-write_output(destination)
+write_output(image_address)
 send_stage_log('SUCCEEDED', 'image_preparation')

@@ -1,7 +1,7 @@
 FROM python:3.10.4-slim
 
 RUN apt update
-RUN apt upgrade
+RUN apt upgrade -y
 RUN apt install -y curl git
 
 RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-385.0.0-linux-x86_64.tar.gz > /tmp/google-cloud-sdk.tar.gz \

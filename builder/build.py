@@ -1,4 +1,5 @@
 import logging
+import re
 import os
 import sys
 import tempfile
@@ -14,13 +15,13 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 IMAGE_REGISTRY_ADDRESS = 'eu.gcr.io/acai-bolt/bolt-deployer-builds-local'
+SPECIAL_CHARACTERS_REGEX = re.compile(r"[^A-Za-z0-9]")
 
 
-def get_image_tag(tenant_id: str, project_id: str, repo_url: str, commit_hash: str):
-    return 'tenants-{tenant}-projects-{project}-repo-{url}-{commit_hash}'.format(
-        tenant=tenant_id,
-        project=project_id,
-        url=repo_url,
+def get_image_tag(repo_url: str, commit_hash: str):
+    formatted_repo_url = SPECIAL_CHARACTERS_REGEX.sub("-", repo_url)
+    return '{url}-{commit_hash}'.format(
+        url=formatted_repo_url,
         commit_hash=commit_hash,
     )
 
@@ -55,7 +56,7 @@ head_sha = repo.head.object.hexsha
 send_stage_log('PENDING', 'image_preparation')
 google_cloud_build = GoogleCloudBuild()
 google_cloud_build.activate_service_account()
-image_tag = get_image_tag(tenant_id, project_id, repo_url, head_sha)
+image_tag = get_image_tag(repo_url, head_sha)
 image_address = get_docker_image_destination(image_tag)
 
 if not int(os.environ.get('NO_CACHE')):

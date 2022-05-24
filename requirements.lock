@@ -3,7 +3,6 @@ chardet==3.0.4
 gitdb2==3.0.1
 GitPython==2.1.11
 idna==2.8
-redis==3.2.1
 requests==2.22.0
 smmap==3.0.4
 smmap2==3.0.1

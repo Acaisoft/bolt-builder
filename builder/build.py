@@ -8,7 +8,7 @@ import git
 
 from execution_stage_log import send_stage_log
 from google_cloud_build import GoogleCloudBuild
-from locust_wrapper_packer import LocustWrapperPacker
+from locust_wrapper_packer import LocustWrapper
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -68,7 +68,7 @@ if not int(os.environ.get('NO_CACHE')):
         exit(0)
 
 logger.info('Wrapping repository')
-wrapper = LocustWrapperPacker()
+wrapper = LocustWrapper()
 wrapper.wrap(repo_path)
 logger.info('Repository wrapped')
 

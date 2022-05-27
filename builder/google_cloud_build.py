@@ -37,7 +37,6 @@ class GoogleCloudBuild:
         cls._account_activated = True
 
     def build(self, dir_path: str, new_docker_image: str, prev_docker_image: Optional[str] = None):
-        self.activate_service_account()
         config_file_path = self._prepare_config(dir_path, new_docker_image, prev_docker_image)
         command = [
             'gcloud',
@@ -127,6 +126,24 @@ class GoogleCloudBuild:
         }
 
         return config
+
+    def check_if_image_exist(self, registry_address: str, image_tag: str):
+        command = [
+            'gcloud',
+            'container',
+            'images',
+            'list-tags',
+            '--filter',
+            f'tags:{image_tag}',
+            registry_address,
+        ]
+        result = subprocess.run(command, stdout=subprocess.PIPE)
+
+        if result.returncode != 0:
+            raise GoogleCloudBuildError(result.stderr.decode())
+
+        response_length = len(result.stdout)
+        return bool(response_length)
 
 
 if __name__ == '__main__':
